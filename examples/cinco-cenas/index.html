@@ -1,0 +1,1615 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Cinco Cenas</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/fonts/Inter-400-latin.woff2") format("woff2");
+        font-weight: 400 500;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/fonts/Inter-700-latin.woff2") format("woff2");
+        font-weight: 600 700;
+        font-style: normal;
+      }
+      body {
+        margin: 0;
+        background: #000;
+        font-family: "Inter", sans-serif;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .cam {
+        position: absolute;
+        inset: 0;
+      }
+      .cam > svg,
+      .full {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .vignette {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(0, 0, 0, 0) 55%,
+          rgba(0, 0, 0, 0.55) 100%
+        );
+      }
+      #fade {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        opacity: 1;
+        pointer-events: none;
+      }
+
+      /* ---------- Cena 2: close-up do papel ---------- */
+      #s2-close {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        background:
+          repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.08) 0 3px, rgba(0, 0, 0, 0) 3px 38px),
+          linear-gradient(160deg, #6b4429, #3e2615);
+      }
+      #s2-paper-wrap {
+        position: absolute;
+        left: 470px;
+        top: 70px;
+        width: 980px;
+        height: 940px;
+      }
+      #s2-paper {
+        position: absolute;
+        inset: 0;
+        background:
+          repeating-linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0) 0 88px,
+            rgba(70, 110, 160, 0.25) 88px 90px
+          ),
+          #f6f2e8;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.55);
+        border-radius: 4px;
+        padding: 90px 90px 0 120px;
+        box-sizing: border-box;
+        color: #1b2a4a;
+      }
+      #s2-paper::before {
+        content: "";
+        position: absolute;
+        left: 92px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: rgba(200, 60, 60, 0.45);
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        height: 90px;
+        font-size: 52px;
+        font-style: italic;
+        clip-path: inset(0 100% 0 0);
+      }
+      .row .lbl {
+        font-weight: 400;
+      }
+      .row .val {
+        font-weight: 600;
+        font-style: normal;
+      }
+      .row.neg .val {
+        color: #a0262f;
+      }
+      #s2-rule {
+        height: 90px;
+        position: relative;
+      }
+      #s2-rule-line {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 44px;
+        height: 5px;
+        background: #1b2a4a;
+        transform-origin: left center;
+      }
+      .row.total {
+        font-size: 64px;
+      }
+      #s2-circle {
+        position: absolute;
+        right: 40px;
+        top: 516px;
+        width: 400px;
+        height: 150px;
+        overflow: visible;
+      }
+      #s2-pen {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 520px;
+        height: 120px;
+      }
+
+      /* ---------- Cena 4: renda despencando ---------- */
+      #s4 .cam {
+        background: radial-gradient(ellipse at 50% 40%, #151a24, #07080c 75%);
+      }
+      #s4-red {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse at 70% 60%,
+          rgba(200, 20, 30, 0.55),
+          rgba(0, 0, 0, 0) 70%
+        );
+        opacity: 0;
+      }
+      #s4-label {
+        position: absolute;
+        left: 160px;
+        top: 96px;
+        font-size: 30px;
+        letter-spacing: 0.3em;
+        font-weight: 600;
+        color: #8a93a6;
+      }
+      #s4-value {
+        position: absolute;
+        left: 156px;
+        top: 140px;
+        font-size: 150px;
+        font-weight: 700;
+        color: #f2f4f8;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+      }
+      #s4-badge {
+        position: absolute;
+        right: 160px;
+        top: 150px;
+        padding: 18px 34px;
+        border-radius: 14px;
+        background: #c4161c;
+        color: #fff;
+        font-size: 72px;
+        font-weight: 700;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-width="1920"
+      data-height="1080"
+      data-duration="30"
+    >
+      <!-- =========================================================
+           CENA 1 — Uma casa sofisticada (entardecer)
+           ========================================================= -->
+      <section id="s1" class="scene clip" data-start="0" data-duration="6" data-track-index="0">
+        <div class="cam" id="s1-cam">
+          <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="s1-sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#0a1330" />
+                <stop offset="0.5" stop-color="#2a3264" />
+                <stop offset="0.8" stop-color="#8e5f6e" />
+                <stop offset="1" stop-color="#e3a173" />
+              </linearGradient>
+              <linearGradient id="s1-glass" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffe6b0" />
+                <stop offset="1" stop-color="#f0a14a" />
+              </linearGradient>
+              <linearGradient id="s1-pool" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#2aa6c9" />
+                <stop offset="1" stop-color="#0b3b58" />
+              </linearGradient>
+              <radialGradient id="s1-warm" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stop-color="#ffc77a" stop-opacity="0.55" />
+                <stop offset="1" stop-color="#ffc77a" stop-opacity="0" />
+              </radialGradient>
+              <radialGradient id="s1-moonglow" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stop-color="#f4ead2" stop-opacity="0.35" />
+                <stop offset="1" stop-color="#f4ead2" stop-opacity="0" />
+              </radialGradient>
+              <clipPath id="s1-poolclip">
+                <path d="M250 872 H1670 L1740 940 H180 Z" />
+              </clipPath>
+            </defs>
+            <rect width="1920" height="1080" fill="url(#s1-sky)" />
+            <g id="s1-stars"></g>
+            <circle cx="1600" cy="170" r="140" fill="url(#s1-moonglow)" />
+            <circle cx="1600" cy="170" r="44" fill="#f4ead2" />
+            <path
+              d="M0 760 C300 690 520 720 820 735 S1420 680 1920 725 V1080 H0 Z"
+              fill="#1a2142"
+            />
+            <path
+              d="M0 800 C260 770 600 790 900 790 S1500 770 1920 790 V1080 H0 Z"
+              fill="#141a33"
+            />
+            <!-- ciprestes ao fundo -->
+            <g fill="#0f1527">
+              <path d="M170 820 C150 700 170 600 190 560 C210 600 230 700 210 820 Z" />
+              <path d="M240 820 C225 720 240 640 255 610 C270 640 285 720 270 820 Z" />
+              <path d="M1660 820 C1640 690 1660 590 1680 550 C1700 590 1720 690 1700 820 Z" />
+              <path d="M1735 820 C1720 720 1735 650 1750 620 C1765 650 1780 720 1765 820 Z" />
+            </g>
+            <!-- brilho quente atrás da casa -->
+            <ellipse
+              id="s1-halo"
+              cx="960"
+              cy="640"
+              rx="760"
+              ry="330"
+              fill="url(#s1-warm)"
+              opacity="0"
+            />
+
+            <!-- CASA -->
+            <g id="s1-house">
+              <!-- volume de pedra -->
+              <rect x="1290" y="500" width="240" height="330" fill="#b8ab96" />
+              <g stroke="#9f927c" stroke-width="3">
+                <line x1="1290" y1="530" x2="1530" y2="530" />
+                <line x1="1290" y1="562" x2="1530" y2="562" />
+                <line x1="1290" y1="594" x2="1530" y2="594" />
+                <line x1="1290" y1="626" x2="1530" y2="626" />
+                <line x1="1290" y1="658" x2="1530" y2="658" />
+                <line x1="1290" y1="690" x2="1530" y2="690" />
+                <line x1="1290" y1="722" x2="1530" y2="722" />
+                <line x1="1290" y1="754" x2="1530" y2="754" />
+                <line x1="1290" y1="786" x2="1530" y2="786" />
+              </g>
+              <rect x="1270" y="486" width="282" height="16" fill="#f3efe7" />
+              <!-- porta de vidro -->
+              <rect x="1370" y="640" width="96" height="190" fill="url(#s1-glass)" />
+              <rect
+                x="1370"
+                y="640"
+                width="96"
+                height="190"
+                fill="none"
+                stroke="#2c2a28"
+                stroke-width="6"
+              />
+              <rect
+                class="s1-dim"
+                x="1370"
+                y="640"
+                width="96"
+                height="190"
+                fill="#0c1222"
+                opacity="0.88"
+              />
+
+              <!-- volume inferior -->
+              <rect x="520" y="600" width="790" height="230" fill="#ebe5da" />
+              <rect x="590" y="626" width="650" height="190" fill="url(#s1-glass)" />
+              <!-- interior -->
+              <g opacity="0.55">
+                <rect x="640" y="752" width="240" height="46" rx="10" fill="#9a5a26" />
+                <rect x="640" y="726" width="40" height="72" rx="8" fill="#9a5a26" />
+                <rect x="960" y="660" width="6" height="140" fill="#7a4a22" />
+                <path d="M930 660 H996 L980 630 H946 Z" fill="#7a4a22" />
+                <rect x="1080" y="700" width="110" height="98" fill="#8e5a2e" />
+                <circle cx="1135" cy="684" r="28" fill="#4f6b3a" />
+              </g>
+              <g stroke="#2c2a28" stroke-width="7">
+                <rect x="590" y="626" width="650" height="190" fill="none" />
+                <line x1="720" y1="626" x2="720" y2="816" />
+                <line x1="850" y1="626" x2="850" y2="816" />
+                <line x1="980" y1="626" x2="980" y2="816" />
+                <line x1="1110" y1="626" x2="1110" y2="816" />
+              </g>
+              <rect
+                class="s1-dim"
+                x="590"
+                y="626"
+                width="650"
+                height="190"
+                fill="#0c1222"
+                opacity="0.88"
+              />
+
+              <!-- volume superior em balanço -->
+              <rect x="430" y="420" width="830" height="180" fill="#22242c" />
+              <rect x="480" y="448" width="560" height="124" fill="url(#s1-glass)" />
+              <g opacity="0.5">
+                <rect x="520" y="520" width="150" height="52" fill="#8e5a2e" />
+                <rect x="760" y="470" width="90" height="70" fill="#5a3a22" />
+              </g>
+              <g stroke="#2c2a28" stroke-width="6">
+                <rect x="480" y="448" width="560" height="124" fill="none" />
+                <line x1="620" y1="448" x2="620" y2="572" />
+                <line x1="760" y1="448" x2="760" y2="572" />
+                <line x1="900" y1="448" x2="900" y2="572" />
+              </g>
+              <rect
+                class="s1-dim"
+                x="480"
+                y="448"
+                width="560"
+                height="124"
+                fill="#0c1222"
+                opacity="0.88"
+              />
+              <!-- ripado de madeira -->
+              <rect x="1060" y="448" width="170" height="124" fill="#6b4a33" />
+              <g stroke="#4c3322" stroke-width="5">
+                <line x1="1078" y1="448" x2="1078" y2="572" />
+                <line x1="1098" y1="448" x2="1098" y2="572" />
+                <line x1="1118" y1="448" x2="1118" y2="572" />
+                <line x1="1138" y1="448" x2="1138" y2="572" />
+                <line x1="1158" y1="448" x2="1158" y2="572" />
+                <line x1="1178" y1="448" x2="1178" y2="572" />
+                <line x1="1198" y1="448" x2="1198" y2="572" />
+                <line x1="1218" y1="448" x2="1218" y2="572" />
+              </g>
+              <!-- laje -->
+              <rect x="405" y="402" width="880" height="22" fill="#f4f1ea" />
+              <!-- spots sob o balanço -->
+              <g id="s1-spots" fill="#ffd79a" opacity="0">
+                <circle cx="560" cy="604" r="5" />
+                <circle cx="700" cy="604" r="5" />
+                <circle cx="840" cy="604" r="5" />
+                <circle cx="980" cy="604" r="5" />
+                <circle cx="1120" cy="604" r="5" />
+                <circle cx="1240" cy="604" r="5" />
+              </g>
+            </g>
+
+            <!-- deck + piscina -->
+            <rect x="0" y="830" width="1920" height="250" fill="#101a15" />
+            <path d="M150 850 H1770 L1800 870 H120 Z" fill="#cfc5b3" />
+            <path d="M250 872 H1670 L1740 940 H180 Z" fill="url(#s1-pool)" />
+            <g clip-path="url(#s1-poolclip)">
+              <g id="s1-reflect" opacity="0">
+                <rect x="590" y="872" width="650" height="40" fill="#ffcf85" opacity="0.45" />
+                <rect x="480" y="914" width="560" height="22" fill="#ffcf85" opacity="0.3" />
+                <rect x="1370" y="872" width="96" height="40" fill="#ffcf85" opacity="0.4" />
+              </g>
+              <g id="s1-ripples" stroke="#bfefff" stroke-width="2" opacity="0.35">
+                <line x1="300" y1="890" x2="520" y2="890" />
+                <line x1="760" y1="905" x2="1010" y2="905" />
+                <line x1="1180" y1="896" x2="1420" y2="896" />
+                <line x1="420" y1="925" x2="640" y2="925" />
+                <line x1="1300" y1="928" x2="1560" y2="928" />
+              </g>
+            </g>
+            <path d="M180 940 H1740 L1760 958 H160 Z" fill="#cfc5b3" />
+            <!-- gramado e balizadores -->
+            <rect x="0" y="958" width="1920" height="122" fill="#0c140f" />
+            <g id="s1-garden" opacity="0">
+              <circle cx="300" cy="1000" r="40" fill="url(#s1-warm)" />
+              <circle cx="700" cy="1000" r="40" fill="url(#s1-warm)" />
+              <circle cx="1100" cy="1000" r="40" fill="url(#s1-warm)" />
+              <circle cx="1500" cy="1000" r="40" fill="url(#s1-warm)" />
+              <g fill="#ffe0a8">
+                <rect x="296" y="990" width="8" height="20" />
+                <rect x="696" y="990" width="8" height="20" />
+                <rect x="1096" y="990" width="8" height="20" />
+                <rect x="1496" y="990" width="8" height="20" />
+              </g>
+            </g>
+            <!-- palmeiras em primeiro plano -->
+            <g fill="#06090f" stroke="#06090f">
+              <path
+                d="M90 1080 C110 900 140 700 120 520"
+                fill="none"
+                stroke-width="22"
+                stroke-linecap="round"
+              />
+              <path d="M120 520 C60 480 0 500 -40 560 C20 520 70 520 120 525 Z" />
+              <path d="M120 520 C170 470 250 470 300 520 C240 500 180 505 120 525 Z" />
+              <path d="M120 520 C110 440 60 410 10 420 C70 440 100 470 120 525 Z" />
+              <path d="M120 520 C150 450 210 420 260 430 C200 450 160 480 120 525 Z" />
+              <path d="M120 520 C80 560 60 620 70 680 C90 610 110 570 120 525 Z" />
+              <path
+                d="M1830 1080 C1810 900 1790 720 1810 560"
+                fill="none"
+                stroke-width="22"
+                stroke-linecap="round"
+              />
+              <path d="M1810 560 C1870 520 1930 540 1960 600 C1900 560 1860 560 1810 565 Z" />
+              <path d="M1810 560 C1760 510 1680 510 1630 560 C1690 540 1750 545 1810 565 Z" />
+              <path d="M1810 560 C1820 480 1870 450 1920 460 C1860 480 1830 510 1810 565 Z" />
+              <path d="M1810 560 C1780 490 1720 460 1670 470 C1730 490 1770 520 1810 565 Z" />
+            </g>
+          </svg>
+        </div>
+        <div class="vignette"></div>
+      </section>
+
+      <!-- =========================================================
+           CENA 2 — Homem de terno fazendo contas apoiado na mesa
+           ========================================================= -->
+      <section id="s2" class="scene clip" data-start="6" data-duration="6" data-track-index="0">
+        <div class="cam" id="s2-cam">
+          <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="s2-wall" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#1e1a17" />
+                <stop offset="1" stop-color="#2e2722" />
+              </linearGradient>
+              <radialGradient id="s2-lamp" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stop-color="#ffcf8a" stop-opacity="0.55" />
+                <stop offset="1" stop-color="#ffcf8a" stop-opacity="0" />
+              </radialGradient>
+              <linearGradient id="s2-desk" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#6a4329" />
+                <stop offset="1" stop-color="#4a2d1a" />
+              </linearGradient>
+            </defs>
+            <rect width="1920" height="1080" fill="url(#s2-wall)" />
+            <!-- janela com cidade à noite -->
+            <rect x="110" y="120" width="580" height="480" fill="#0c1628" />
+            <g id="s2-city"></g>
+            <g stroke="#2a2420" stroke-width="5" opacity="0.7" id="s2-blinds"></g>
+            <rect
+              x="110"
+              y="120"
+              width="580"
+              height="480"
+              fill="none"
+              stroke="#14110f"
+              stroke-width="16"
+            />
+            <!-- estante -->
+            <rect x="1360" y="110" width="440" height="540" fill="#33251b" />
+            <g id="s2-books"></g>
+            <g fill="#1f1610">
+              <rect x="1360" y="240" width="440" height="12" />
+              <rect x="1360" y="380" width="440" height="12" />
+              <rect x="1360" y="520" width="440" height="12" />
+            </g>
+            <!-- luz do abajur -->
+            <circle id="s2-glow" cx="760" cy="720" r="720" fill="url(#s2-lamp)" />
+
+            <!-- encosto da cadeira -->
+            <rect x="800" y="440" width="360" height="380" rx="36" fill="#15110e" />
+            <!-- tronco -->
+            <g id="s2-body">
+              <path
+                d="M740 820 L775 610 Q790 560 860 548 L1100 548 Q1170 560 1185 610 L1220 820 Z"
+                fill="#1c2742"
+              />
+              <path d="M932 548 L1028 548 L980 660 Z" fill="#f1f0ec" />
+              <path d="M968 562 L992 562 L1000 648 L980 676 L960 648 Z" fill="#7d1f2c" />
+              <path d="M966 548 L994 548 L990 566 L970 566 Z" fill="#5e1621" />
+              <path d="M932 548 L888 566 L958 720 L980 660 Z" fill="#141d34" />
+              <path d="M1028 548 L1072 566 L1002 720 L980 660 Z" fill="#141d34" />
+              <rect x="1040" y="610" width="40" height="8" rx="3" fill="#e9e6df" />
+              <!-- pescoço e cabeça (inclinada para baixo) -->
+              <rect x="948" y="498" width="64" height="62" fill="#a96f4b" />
+              <g id="s2-head">
+                <ellipse cx="906" cy="458" rx="14" ry="22" fill="#b97c56" />
+                <ellipse cx="1054" cy="458" rx="14" ry="22" fill="#b97c56" />
+                <ellipse cx="980" cy="452" rx="74" ry="84" fill="#c48760" />
+                <path
+                  d="M904 446 Q900 362 980 358 Q1060 362 1056 446 Q1046 404 980 400 Q914 404 904 446 Z"
+                  fill="#2a1c14"
+                />
+                <path
+                  d="M930 452 Q948 446 966 452"
+                  stroke="#2a1c14"
+                  stroke-width="6"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M994 452 Q1012 446 1030 452"
+                  stroke="#2a1c14"
+                  stroke-width="6"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M936 476 Q948 482 960 476"
+                  stroke="#3a2418"
+                  stroke-width="4"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M1000 476 Q1012 482 1024 476"
+                  stroke="#3a2418"
+                  stroke-width="4"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M980 470 L972 506 L988 506"
+                  stroke="#9c6442"
+                  stroke-width="4"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M960 524 Q980 520 1000 524"
+                  stroke="#7a4430"
+                  stroke-width="5"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+              </g>
+            </g>
+
+            <!-- mesa -->
+            <path d="M180 790 H1740 L1920 1010 H0 Z" fill="url(#s2-desk)" />
+            <g stroke="#5a3820" stroke-width="3" opacity="0.6">
+              <path d="M150 830 H1780" />
+              <path d="M90 900 H1840" />
+              <path d="M40 960 H1890" />
+            </g>
+            <rect x="0" y="1010" width="1920" height="70" fill="#2f1c10" />
+            <ellipse cx="960" cy="905" rx="560" ry="90" fill="#ffcf8a" opacity="0.14" />
+
+            <!-- abajur -->
+            <g>
+              <ellipse cx="470" cy="860" rx="80" ry="18" fill="#1b1b1d" />
+              <path
+                d="M470 856 L520 640 L600 560"
+                stroke="#2a2a2d"
+                stroke-width="12"
+                fill="none"
+                stroke-linecap="round"
+              />
+              <path d="M560 520 L700 560 L660 640 L520 600 Z" fill="#23402f" />
+              <path
+                d="M520 600 L660 640"
+                stroke="#ffd690"
+                stroke-width="10"
+                stroke-linecap="round"
+              />
+            </g>
+            <!-- caneca -->
+            <g>
+              <rect x="640" y="800" width="70" height="82" rx="10" fill="#e8e3da" />
+              <path d="M710 818 Q748 830 710 862" stroke="#e8e3da" stroke-width="10" fill="none" />
+            </g>
+            <!-- calculadora -->
+            <g>
+              <path d="M1240 816 H1390 L1410 912 H1224 Z" fill="#232327" />
+              <path d="M1256 826 H1376 L1380 850 H1252 Z" fill="#9fb59b" />
+              <g fill="#4a4a52">
+                <rect x="1252" y="860" width="26" height="12" rx="3" />
+                <rect x="1290" y="860" width="26" height="12" rx="3" />
+                <rect x="1328" y="860" width="26" height="12" rx="3" />
+                <rect x="1364" y="860" width="26" height="12" rx="3" />
+                <rect x="1248" y="882" width="28" height="14" rx="3" />
+                <rect x="1288" y="882" width="28" height="14" rx="3" />
+                <rect x="1328" y="882" width="28" height="14" rx="3" />
+                <rect x="1368" y="882" width="28" height="14" rx="3" fill="#c46b2b" />
+              </g>
+            </g>
+            <!-- papel -->
+            <path d="M860 806 H1100 L1126 902 H832 Z" fill="#f6f2e8" />
+            <g stroke="#3a4a6a" stroke-width="3" opacity="0.6" stroke-linecap="round">
+              <path d="M880 822 H1060" />
+              <path d="M876 840 H1040" />
+              <path d="M872 858 H1074" />
+              <path d="M868 876 H1020" />
+            </g>
+            <!-- braços apoiados -->
+            <path
+              d="M800 610 Q752 700 784 800 L892 842"
+              stroke="#2a375c"
+              stroke-width="56"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <rect x="868" y="818" width="38" height="44" rx="10" fill="#efede8" />
+            <ellipse cx="920" cy="848" rx="34" ry="24" fill="#c48760" />
+            <g id="s2-arm-r">
+              <path
+                d="M1160 610 Q1208 700 1176 800 L1068 838"
+                stroke="#2a375c"
+                stroke-width="56"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <rect x="1052" y="814" width="38" height="44" rx="10" fill="#efede8" />
+              <g id="s2-hand">
+                <ellipse cx="1036" cy="846" rx="34" ry="24" fill="#c48760" />
+                <path
+                  d="M1020 852 L990 812"
+                  stroke="#111"
+                  stroke-width="8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M1020 852 L1010 840"
+                  stroke="#d6b04a"
+                  stroke-width="8"
+                  stroke-linecap="round"
+                />
+              </g>
+            </g>
+          </svg>
+        </div>
+
+        <!-- close-up: o papel com as contas -->
+        <div id="s2-close">
+          <div id="s2-paper-wrap">
+            <div id="s2-paper">
+              <div class="row">
+                <span class="lbl">Renda mensal</span><span class="val">R$ 18.500</span>
+              </div>
+              <div class="row neg">
+                <span class="lbl">Casa</span><span class="val">− R$ 7.800</span>
+              </div>
+              <div class="row neg">
+                <span class="lbl">Escola</span><span class="val">− R$ 6.200</span>
+              </div>
+              <div class="row neg">
+                <span class="lbl">Saúde</span><span class="val">− R$ 3.400</span>
+              </div>
+              <div id="s2-rule"><div id="s2-rule-line"></div></div>
+              <div class="row total">
+                <span class="lbl">Sobra</span><span class="val">R$ 1.100</span>
+              </div>
+              <svg id="s2-circle" viewBox="0 0 400 150">
+                <path
+                  id="s2-circle-path"
+                  d="M210 18 C330 14 392 48 386 80 C378 124 260 140 170 136 C70 132 10 110 14 76 C18 40 110 16 236 22"
+                  fill="none"
+                  stroke="#c4161c"
+                  stroke-width="7"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+          </div>
+          <svg id="s2-pen" viewBox="0 0 520 120">
+            <path d="M8 60 L60 44 L60 76 Z" fill="#c9a24a" />
+            <path d="M8 60 L22 56 L22 64 Z" fill="#222" />
+            <rect x="60" y="40" width="440" height="40" rx="18" fill="#141414" />
+            <rect x="120" y="40" width="40" height="40" fill="#c9a24a" />
+            <rect x="200" y="30" width="200" height="12" rx="6" fill="#c9a24a" />
+          </svg>
+        </div>
+        <div class="vignette"></div>
+      </section>
+
+      <!-- =========================================================
+           CENA 3 — Escola de alto padrão
+           ========================================================= -->
+      <section id="s3" class="scene clip" data-start="12" data-duration="6" data-track-index="0">
+        <div class="cam" id="s3-cam">
+          <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="s3-sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#5d9bd6" />
+                <stop offset="1" stop-color="#d5ebf6" />
+              </linearGradient>
+              <linearGradient id="s3-lawn" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#5d9a45" />
+                <stop offset="1" stop-color="#3f7432" />
+              </linearGradient>
+              <radialGradient id="s3-sun" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stop-color="#fff6d8" stop-opacity="0.9" />
+                <stop offset="1" stop-color="#fff6d8" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+            <rect width="1920" height="1080" fill="url(#s3-sky)" />
+            <circle cx="260" cy="150" r="260" fill="url(#s3-sun)" />
+            <g id="s3-clouds" fill="#ffffff">
+              <g id="s3-cloud-a" opacity="0.9">
+                <ellipse cx="560" cy="170" rx="120" ry="40" />
+                <ellipse cx="620" cy="146" rx="80" ry="46" />
+                <ellipse cx="500" cy="156" rx="60" ry="34" />
+              </g>
+              <g id="s3-cloud-b" opacity="0.8">
+                <ellipse cx="1420" cy="120" rx="140" ry="38" />
+                <ellipse cx="1480" cy="96" rx="80" ry="40" />
+                <ellipse cx="1360" cy="104" rx="60" ry="30" />
+              </g>
+              <g id="s3-cloud-c" opacity="0.7">
+                <ellipse cx="1000" cy="240" rx="90" ry="26" />
+                <ellipse cx="1040" cy="222" rx="56" ry="30" />
+              </g>
+            </g>
+            <g id="s3-birds" stroke="#2c3e55" stroke-width="4" fill="none" stroke-linecap="round">
+              <path d="M300 300 q14 -12 28 0 q14 -12 28 0" />
+              <path d="M360 270 q10 -9 20 0 q10 -9 20 0" />
+              <path d="M250 330 q10 -9 20 0 q10 -9 20 0" />
+            </g>
+            <!-- árvores ao fundo -->
+            <g fill="#3d6e3a">
+              <ellipse cx="120" cy="650" rx="140" ry="110" />
+              <ellipse cx="300" cy="670" rx="130" ry="90" />
+              <ellipse cx="1650" cy="660" rx="150" ry="100" />
+              <ellipse cx="1830" cy="650" rx="140" ry="120" />
+            </g>
+
+            <!-- prédio -->
+            <g id="s3-building">
+              <!-- alas -->
+              <path d="M250 470 H840 L800 410 H290 Z" fill="#4a5568" />
+              <path d="M1080 470 H1670 L1630 410 H1120 Z" fill="#4a5568" />
+              <rect x="260" y="470" width="580" height="270" fill="#efe6d6" />
+              <rect x="1080" y="470" width="580" height="270" fill="#efe6d6" />
+              <rect x="260" y="590" width="580" height="10" fill="#e0d4bf" />
+              <rect x="1080" y="590" width="580" height="10" fill="#e0d4bf" />
+              <g id="s3-windows"></g>
+              <!-- bloco central -->
+              <rect x="780" y="380" width="360" height="360" fill="#f6efe2" />
+              <path
+                d="M760 384 H1160 L960 286 Z"
+                fill="#f6efe2"
+                stroke="#d8ccb5"
+                stroke-width="6"
+              />
+              <circle cx="960" cy="346" r="26" fill="#1d3557" />
+              <path d="M948 336 L960 330 L972 336 L972 352 L960 360 L948 352 Z" fill="#d4af37" />
+              <rect x="772" y="384" width="376" height="40" fill="#e9dfcc" />
+              <text
+                x="960"
+                y="414"
+                text-anchor="middle"
+                font-family="Inter"
+                font-weight="600"
+                font-size="26"
+                letter-spacing="14"
+                fill="#1d3557"
+              >
+                COLÉGIO
+              </text>
+              <!-- torre do relógio -->
+              <rect x="916" y="150" width="88" height="140" fill="#f6efe2" />
+              <path d="M904 152 H1016 L960 70 Z" fill="#4a5568" />
+              <circle cx="960" cy="214" r="30" fill="#ffffff" stroke="#1d3557" stroke-width="5" />
+              <line
+                x1="960"
+                y1="214"
+                x2="960"
+                y2="194"
+                stroke="#1d3557"
+                stroke-width="5"
+                stroke-linecap="round"
+              />
+              <line
+                id="s3-minute"
+                x1="960"
+                y1="214"
+                x2="978"
+                y2="214"
+                stroke="#1d3557"
+                stroke-width="4"
+                stroke-linecap="round"
+              />
+              <!-- colunas -->
+              <g fill="#ffffff">
+                <rect x="800" y="430" width="24" height="280" />
+                <rect x="860" y="430" width="24" height="280" />
+                <rect x="920" y="430" width="24" height="280" />
+                <rect x="976" y="430" width="24" height="280" />
+                <rect x="1036" y="430" width="24" height="280" />
+                <rect x="1096" y="430" width="24" height="280" />
+              </g>
+              <g fill="#e2d7c2">
+                <rect x="794" y="426" width="36" height="10" />
+                <rect x="854" y="426" width="36" height="10" />
+                <rect x="914" y="426" width="36" height="10" />
+                <rect x="970" y="426" width="36" height="10" />
+                <rect x="1030" y="426" width="36" height="10" />
+                <rect x="1090" y="426" width="36" height="10" />
+              </g>
+              <path d="M930 710 V610 Q960 576 990 610 V710 Z" fill="#2b3a52" />
+              <!-- escadaria -->
+              <rect x="760" y="708" width="400" height="12" fill="#ddd2bd" />
+              <rect x="740" y="720" width="440" height="12" fill="#d3c7b0" />
+              <rect x="720" y="732" width="480" height="12" fill="#c9bca4" />
+            </g>
+            <!-- bandeiras -->
+            <g>
+              <rect x="600" y="300" width="6" height="440" fill="#8a8f98" />
+              <path id="s3-flag-a" d="M606 306 H696 L686 336 L696 366 H606 Z" fill="#1d3557" />
+              <rect x="1314" y="300" width="6" height="440" fill="#8a8f98" />
+              <path id="s3-flag-b" d="M1320 306 H1410 L1400 336 L1410 366 H1320 Z" fill="#8a1c2b" />
+            </g>
+
+            <!-- gramado e caminho -->
+            <rect x="0" y="740" width="1920" height="340" fill="url(#s3-lawn)" />
+            <path d="M880 744 H1040 L1340 1080 H580 Z" fill="#dccfb6" />
+            <g fill="#2f5e2a">
+              <rect x="820" y="760" width="40" height="22" rx="10" />
+              <rect x="1060" y="760" width="40" height="22" rx="10" />
+              <rect x="740" y="830" width="60" height="30" rx="14" />
+              <rect x="1120" y="830" width="60" height="30" rx="14" />
+              <rect x="630" y="930" width="84" height="40" rx="18" />
+              <rect x="1206" y="930" width="84" height="40" rx="18" />
+            </g>
+            <!-- alunos -->
+            <g id="s3-kids" fill="#1d2b45">
+              <g class="s3-kid" id="s3-kid-1">
+                <circle cx="0" cy="-70" r="14" fill="#7a4e33" />
+                <rect x="-16" y="-56" width="32" height="44" rx="10" />
+                <rect x="-12" y="-14" width="10" height="26" />
+                <rect x="2" y="-14" width="10" height="26" />
+                <rect x="-24" y="-52" width="14" height="30" rx="5" fill="#8a1c2b" />
+              </g>
+              <g class="s3-kid" id="s3-kid-2">
+                <circle cx="0" cy="-70" r="14" fill="#e0b08c" />
+                <rect x="-16" y="-56" width="32" height="44" rx="10" />
+                <rect x="-12" y="-14" width="10" height="26" />
+                <rect x="2" y="-14" width="10" height="26" />
+                <rect x="10" y="-52" width="14" height="30" rx="5" fill="#d4af37" />
+              </g>
+              <g class="s3-kid" id="s3-kid-3">
+                <circle cx="0" cy="-70" r="14" fill="#a8704a" />
+                <rect x="-16" y="-56" width="32" height="44" rx="10" />
+                <rect x="-12" y="-14" width="10" height="26" />
+                <rect x="2" y="-14" width="10" height="26" />
+                <rect x="-24" y="-52" width="14" height="30" rx="5" fill="#2f5e2a" />
+              </g>
+            </g>
+            <!-- árvores em primeiro plano -->
+            <g>
+              <rect x="150" y="760" width="26" height="320" fill="#4a3424" />
+              <ellipse cx="163" cy="740" rx="170" ry="150" fill="#2f5e2a" />
+              <ellipse cx="120" cy="680" rx="110" ry="100" fill="#3a7034" />
+              <rect x="1744" y="760" width="26" height="320" fill="#4a3424" />
+              <ellipse cx="1757" cy="740" rx="170" ry="150" fill="#2f5e2a" />
+              <ellipse cx="1800" cy="680" rx="110" ry="100" fill="#3a7034" />
+            </g>
+          </svg>
+        </div>
+        <div class="vignette" style="opacity: 0.5"></div>
+      </section>
+
+      <!-- =========================================================
+           CENA 4 — A renda despencando
+           ========================================================= -->
+      <section id="s4" class="scene clip" data-start="18" data-duration="6" data-track-index="0">
+        <div class="cam" id="s4-cam">
+          <div id="s4-red"></div>
+          <svg class="full" viewBox="0 0 1920 1080">
+            <defs>
+              <linearGradient id="s4-area" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#d4af37" stop-opacity="0.35" />
+                <stop offset="1" stop-color="#d4af37" stop-opacity="0" />
+              </linearGradient>
+              <linearGradient id="s4-area-red" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#e0262e" stop-opacity="0.4" />
+                <stop offset="1" stop-color="#e0262e" stop-opacity="0" />
+              </linearGradient>
+              <clipPath id="s4-reveal">
+                <rect id="s4-reveal-rect" x="0" y="0" width="0" height="1080" />
+              </clipPath>
+            </defs>
+            <g stroke="#ffffff" stroke-opacity="0.06" stroke-width="2">
+              <line x1="160" y1="420" x2="1760" y2="420" />
+              <line x1="160" y1="540" x2="1760" y2="540" />
+              <line x1="160" y1="660" x2="1760" y2="660" />
+              <line x1="160" y1="780" x2="1760" y2="780" />
+              <line x1="160" y1="900" x2="1760" y2="900" />
+            </g>
+            <line x1="160" y1="960" x2="1760" y2="960" stroke="#3a4152" stroke-width="3" />
+            <g
+              fill="#5d6577"
+              font-family="Inter"
+              font-size="24"
+              font-weight="500"
+              text-anchor="middle"
+            >
+              <text x="260" y="1004">JAN</text>
+              <text x="460" y="1004">FEV</text>
+              <text x="660" y="1004">MAR</text>
+              <text x="860" y="1004">ABR</text>
+              <text x="1060" y="1004">MAI</text>
+              <text x="1260" y="1004">JUN</text>
+              <text x="1460" y="1004">JUL</text>
+              <text x="1660" y="1004">AGO</text>
+            </g>
+            <g clip-path="url(#s4-reveal)">
+              <path
+                d="M160 820 L360 770 L560 700 L760 620 L960 520 L1080 470 L1080 960 L160 960 Z"
+                fill="url(#s4-area)"
+              />
+              <path
+                id="s4-area-crash"
+                d="M1080 470 L1180 640 L1300 820 L1460 880 L1760 905 L1760 960 L1080 960 Z"
+                fill="url(#s4-area-red)"
+              />
+            </g>
+            <path
+              id="s4-line-up"
+              d="M160 820 L360 770 L560 700 L760 620 L960 520 L1080 470"
+              fill="none"
+              stroke="#e8c252"
+              stroke-width="10"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              id="s4-line-down"
+              d="M1080 470 L1180 640 L1300 820 L1460 880 L1760 905"
+              fill="none"
+              stroke="#ff3b3b"
+              stroke-width="10"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <circle id="s4-peak" cx="1080" cy="470" r="16" fill="#e8c252" opacity="0" />
+            <g id="s4-arrow" opacity="0">
+              <path d="M1820 560 V840" stroke="#ff3b3b" stroke-width="16" stroke-linecap="round" />
+              <path d="M1770 800 L1820 880 L1870 800 Z" fill="#ff3b3b" />
+            </g>
+          </svg>
+          <div id="s4-label">RENDA MENSAL</div>
+          <div id="s4-value">R$ 12.000</div>
+          <div id="s4-badge">−83%</div>
+        </div>
+        <div class="vignette"></div>
+      </section>
+
+      <!-- =========================================================
+           CENA 5 — Diagnóstico no hospital
+           ========================================================= -->
+      <section id="s5" class="scene clip" data-start="24" data-duration="6" data-track-index="0">
+        <div class="cam" id="s5-cam">
+          <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="s5-wall" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#c3d3dc" />
+                <stop offset="1" stop-color="#93a9b6" />
+              </linearGradient>
+              <radialGradient id="s5-box" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stop-color="#eaf6ff" stop-opacity="0.8" />
+                <stop offset="1" stop-color="#eaf6ff" stop-opacity="0" />
+              </radialGradient>
+              <radialGradient id="s5-spot" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stop-color="#ff4a3a" stop-opacity="0.95" />
+                <stop offset="0.6" stop-color="#ff4a3a" stop-opacity="0.35" />
+                <stop offset="1" stop-color="#ff4a3a" stop-opacity="0" />
+              </radialGradient>
+              <filter id="s5-blur" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="12" />
+              </filter>
+            </defs>
+            <rect width="1920" height="1080" fill="url(#s5-wall)" />
+            <rect x="0" y="860" width="1920" height="220" fill="#7d909b" />
+            <rect x="0" y="852" width="1920" height="10" fill="#e8eef1" />
+            <!-- negatoscópio com raio-x -->
+            <circle cx="470" cy="450" r="420" fill="url(#s5-box)" />
+            <rect
+              x="200"
+              y="230"
+              width="540"
+              height="430"
+              rx="10"
+              fill="#dff0fa"
+              stroke="#9aa9b2"
+              stroke-width="10"
+            />
+            <rect x="236" y="262" width="468" height="366" fill="#0f171e" />
+            <g stroke="#e9f2f7" fill="none" stroke-linecap="round" opacity="0.75">
+              <path d="M470 290 V600" stroke-width="10" />
+              <g stroke-width="7">
+                <path d="M462 320 Q380 300 320 350" />
+                <path d="M462 360 Q370 340 306 400" />
+                <path d="M462 400 Q366 384 300 452" />
+                <path d="M462 440 Q370 428 306 500" />
+                <path d="M462 480 Q380 474 320 540" />
+                <path d="M478 320 Q560 300 620 350" />
+                <path d="M478 360 Q570 340 634 400" />
+                <path d="M478 400 Q574 384 640 452" />
+                <path d="M478 440 Q570 428 634 500" />
+                <path d="M478 480 Q560 474 620 540" />
+              </g>
+              <path d="M330 300 Q470 270 610 300" stroke-width="8" />
+            </g>
+            <g fill="#9fb8c6" opacity="0.18">
+              <ellipse cx="380" cy="440" rx="80" ry="140" />
+              <ellipse cx="560" cy="440" rx="80" ry="140" />
+            </g>
+            <circle id="s5-mass" cx="566" cy="420" r="60" fill="url(#s5-spot)" opacity="0" />
+            <circle
+              id="s5-ring"
+              cx="566"
+              cy="420"
+              r="52"
+              fill="none"
+              stroke="#ff4a3a"
+              stroke-width="5"
+              opacity="0"
+            />
+
+            <!-- monitor cardíaco -->
+            <rect
+              x="1470"
+              y="250"
+              width="320"
+              height="230"
+              rx="16"
+              fill="#0b1418"
+              stroke="#55656e"
+              stroke-width="10"
+            />
+            <rect x="1620" y="480" width="16" height="380" fill="#8b98a0" />
+            <path
+              id="s5-ecg"
+              d="M1490 380 H1540 L1556 350 L1572 410 L1588 300 L1604 420 L1620 380 H1680 L1696 350 L1712 410 L1728 300 L1744 420 L1760 380 H1772"
+              fill="none"
+              stroke="#3cff8f"
+              stroke-opacity="0.3"
+              stroke-width="5"
+              stroke-linejoin="round"
+            />
+            <path
+              id="s5-ecg-hi"
+              d="M1490 380 H1540 L1556 350 L1572 410 L1588 300 L1604 420 L1620 380 H1680 L1696 350 L1712 410 L1728 300 L1744 420 L1760 380 H1772"
+              fill="none"
+              stroke="#7dffb4"
+              stroke-width="6"
+              stroke-linejoin="round"
+              stroke-linecap="round"
+            />
+            <text
+              x="1764"
+              y="300"
+              text-anchor="end"
+              font-family="Inter"
+              font-weight="700"
+              font-size="42"
+              fill="#3cff8f"
+            >
+              72
+            </text>
+
+            <!-- médico -->
+            <g id="s5-doctor">
+              <!-- jaleco -->
+              <path
+                d="M820 1080 L845 700 Q860 620 940 604 L1180 604 Q1260 620 1275 700 L1300 1080 Z"
+                fill="#f4f7f8"
+              />
+              <path d="M1012 604 L1108 604 L1060 720 Z" fill="#5b8fa8" />
+              <path d="M1012 604 L968 624 L1040 860 L1060 720 Z" fill="#e3e9ec" />
+              <path d="M1108 604 L1152 624 L1080 860 L1060 720 Z" fill="#e3e9ec" />
+              <!-- estetoscópio -->
+              <path
+                d="M990 612 Q960 720 1010 770 Q1060 800 1110 770 Q1160 720 1130 612"
+                fill="none"
+                stroke="#2b3138"
+                stroke-width="9"
+                stroke-linecap="round"
+              />
+              <circle cx="1060" cy="800" r="16" fill="#b7c0c6" stroke="#2b3138" stroke-width="5" />
+              <!-- crachá -->
+              <rect
+                x="1150"
+                y="690"
+                width="70"
+                height="44"
+                rx="6"
+                fill="#ffffff"
+                stroke="#9aa9b2"
+                stroke-width="3"
+              />
+              <rect x="1160" y="700" width="20" height="24" fill="#5b8fa8" />
+              <!-- pescoço e cabeça -->
+              <rect x="1028" y="548" width="64" height="66" fill="#d09e7b" />
+              <g id="s5-head">
+                <ellipse cx="986" cy="500" rx="14" ry="22" fill="#d6a582" />
+                <ellipse cx="1134" cy="500" rx="14" ry="22" fill="#d6a582" />
+                <ellipse cx="1060" cy="494" rx="74" ry="86" fill="#e0b08c" />
+                <path
+                  d="M984 486 Q980 396 1060 392 Q1140 396 1136 486 Q1124 440 1060 436 Q996 440 984 486 Z"
+                  fill="#9aa1a8"
+                />
+                <g fill="none" stroke="#2b3138" stroke-width="5">
+                  <rect x="1006" y="482" width="44" height="30" rx="8" />
+                  <rect x="1070" y="482" width="44" height="30" rx="8" />
+                  <path d="M1050 494 H1070" />
+                </g>
+                <path
+                  d="M1014 470 Q1028 462 1044 468"
+                  stroke="#6b7076"
+                  stroke-width="5"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M1076 468 Q1092 462 1106 470"
+                  stroke="#6b7076"
+                  stroke-width="5"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M1060 512 L1052 540 L1066 540"
+                  stroke="#b7835f"
+                  stroke-width="4"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M1040 560 Q1060 556 1080 560"
+                  stroke="#8a5a44"
+                  stroke-width="5"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+              </g>
+              <!-- prancheta segurada com as duas mãos -->
+              <g id="s5-board">
+                <path
+                  d="M880 660 Q850 760 930 820"
+                  stroke="#f4f7f8"
+                  stroke-width="70"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M1240 660 Q1270 760 1190 820"
+                  stroke="#f4f7f8"
+                  stroke-width="70"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <rect x="945" y="740" width="230" height="300" rx="10" fill="#7a5a3c" />
+                <rect x="962" y="766" width="196" height="258" fill="#fbfbf8" />
+                <rect
+                  x="1020"
+                  y="730"
+                  width="80"
+                  height="34"
+                  rx="6"
+                  fill="#b7c0c6"
+                  stroke="#6f7a82"
+                  stroke-width="3"
+                />
+                <text
+                  x="1060"
+                  y="806"
+                  text-anchor="middle"
+                  font-family="Inter"
+                  font-weight="700"
+                  font-size="17"
+                  letter-spacing="2"
+                  fill="#1d3557"
+                >
+                  DIAGNÓSTICO
+                </text>
+                <g stroke="#9aa9b2" stroke-width="4" stroke-linecap="round">
+                  <path d="M980 834 H1140" />
+                  <path d="M980 862 H1120" />
+                  <path d="M980 890 H1140" />
+                  <path d="M980 946 H1100" />
+                  <path d="M980 974 H1130" />
+                </g>
+                <path
+                  id="s5-mark"
+                  d="M976 918 H1146"
+                  stroke="#d0202b"
+                  stroke-width="10"
+                  stroke-linecap="round"
+                />
+                <ellipse cx="948" cy="850" rx="30" ry="40" fill="#e0b08c" />
+                <ellipse cx="1172" cy="850" rx="30" ry="40" fill="#e0b08c" />
+              </g>
+            </g>
+
+            <!-- paciente desfocado em primeiro plano -->
+            <g filter="url(#s5-blur)" fill="#1b2128">
+              <path d="M-40 1080 Q-20 860 160 820 Q300 800 420 860 Q500 920 520 1080 Z" />
+              <ellipse cx="250" cy="720" rx="110" ry="130" />
+            </g>
+          </svg>
+          <div
+            class="full"
+            style="
+              background: linear-gradient(180deg, rgba(40, 90, 120, 0.18), rgba(10, 30, 50, 0.35));
+            "
+          ></div>
+        </div>
+        <div class="vignette"></div>
+      </section>
+
+      <div id="fade"></div>
+    </div>
+
+    <script>
+      // ---------- elementos gerados (determinísticos) ----------
+      function rng(seed) {
+        let s = seed >>> 0;
+        return () => {
+          s = (s + 0x6d2b79f5) >>> 0;
+          let t = s;
+          t = Math.imul(t ^ (t >>> 15), t | 1);
+          t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+      const NS = "http://www.w3.org/2000/svg";
+      function el(tag, attrs, parent) {
+        const n = document.createElementNS(NS, tag);
+        for (const k in attrs) n.setAttribute(k, attrs[k]);
+        parent.appendChild(n);
+        return n;
+      }
+
+      // estrelas (cena 1)
+      const r1 = rng(7);
+      const stars = document.getElementById("s1-stars");
+      for (let i = 0; i < 70; i++) {
+        el(
+          "circle",
+          {
+            class: "s1-star",
+            cx: (r1() * 1920).toFixed(1),
+            cy: (r1() * 520).toFixed(1),
+            r: (0.8 + r1() * 2).toFixed(2),
+            fill: "#fff",
+            opacity: "0",
+          },
+          stars,
+        );
+      }
+
+      // cidade à noite (cena 2)
+      const r2 = rng(11);
+      const city = document.getElementById("s2-city");
+      for (let i = 0; i < 9; i++) {
+        const x = 120 + i * 64 + r2() * 10;
+        const h = 140 + r2() * 260;
+        el("rect", { x, y: 600 - h, width: 54, height: h, fill: "#16213a" }, city);
+        for (let wy = 600 - h + 14; wy < 590; wy += 22) {
+          for (let wx = x + 8; wx < x + 48; wx += 14) {
+            if (r2() < 0.35)
+              el(
+                "rect",
+                { x: wx, y: wy, width: 6, height: 9, fill: "#f7d488", opacity: 0.8 },
+                city,
+              );
+          }
+        }
+      }
+      const blinds = document.getElementById("s2-blinds");
+      for (let y = 140; y < 600; y += 34) el("line", { x1: 110, y1: y, x2: 690, y2: y }, blinds);
+
+      // livros (cena 2)
+      const r3 = rng(23);
+      const books = document.getElementById("s2-books");
+      const bookColors = ["#7d1f2c", "#1d3557", "#2f5e2a", "#8a6a3a", "#4a4a52", "#a0522d"];
+      [
+        [110, 240],
+        [252, 380],
+        [392, 520],
+        [532, 650],
+      ].forEach(([top, bottom]) => {
+        let x = 1374;
+        while (x < 1780) {
+          const w = 16 + r3() * 18;
+          const h = (bottom - top) * (0.7 + r3() * 0.25);
+          el(
+            "rect",
+            {
+              x,
+              y: bottom - h,
+              width: w,
+              height: h,
+              fill: bookColors[Math.floor(r3() * bookColors.length)],
+            },
+            books,
+          );
+          x += w + 3;
+        }
+      });
+
+      // janelas das alas (cena 3)
+      const win = document.getElementById("s3-windows");
+      [290, 1110].forEach((x0) => {
+        for (let c = 0; c < 7; c++) {
+          for (let r = 0; r < 2; r++) {
+            const x = x0 + c * 78;
+            const y = 500 + r * 120;
+            el(
+              "path",
+              {
+                d: `M${x} ${y + 76} V${y + 18} Q${x + 22} ${y} ${x + 44} ${y + 18} V${y + 76} Z`,
+                fill: "#36506e",
+              },
+              win,
+            );
+            el(
+              "path",
+              {
+                d: `M${x + 6} ${y + 70} V${y + 24} L${x + 18} ${y + 14} V${y + 70} Z`,
+                fill: "#8fb3d6",
+                opacity: 0.5,
+              },
+              win,
+            );
+          }
+        }
+      });
+
+      // ---------- timeline ----------
+      const tl = gsap.timeline({ paused: true });
+
+      // transições: mergulho rápido no preto entre as cenas
+      tl.to("#fade", { opacity: 0, duration: 0.6, ease: "power2.out" }, 0);
+      [6, 12, 18, 24].forEach((t) => {
+        tl.to("#fade", { opacity: 1, duration: 0.22, ease: "power2.in" }, t - 0.22);
+        tl.to("#fade", { opacity: 0, duration: 0.35, ease: "power2.out" }, t);
+      });
+      tl.to("#fade", { opacity: 1, duration: 0.6, ease: "power2.in" }, 29.4);
+
+      // CENA 1 — casa acendendo ao anoitecer, câmera aproxima
+      tl.fromTo(
+        "#s1-cam",
+        { scale: 1.14, y: 30 },
+        { scale: 1.0, y: 0, duration: 6, ease: "sine.out" },
+        0,
+      );
+      tl.to(
+        ".s1-star",
+        { opacity: 0.85, duration: 1.2, stagger: { each: 0.02, from: "random" } },
+        0.2,
+      );
+      tl.to(".s1-dim", { opacity: 0, duration: 0.9, stagger: 0.45, ease: "power2.out" }, 0.8);
+      tl.to("#s1-halo", { opacity: 1, duration: 2.2 }, 1.0);
+      tl.to("#s1-reflect", { opacity: 1, duration: 1.8 }, 1.2);
+      tl.to("#s1-spots", { opacity: 1, duration: 0.6 }, 2.4);
+      tl.to("#s1-garden", { opacity: 1, duration: 0.8 }, 2.8);
+      tl.fromTo("#s1-ripples", { x: -30 }, { x: 30, duration: 6, ease: "none" }, 0);
+
+      // CENA 2 — plano geral escrevendo, depois close no papel
+      tl.fromTo(
+        "#s2-cam",
+        { scale: 1.0, x: 0, y: 0 },
+        { scale: 1.12, x: -20, y: -60, duration: 3.4, ease: "sine.inOut" },
+        6,
+      );
+      tl.fromTo(
+        "#s2-hand",
+        { x: -18, y: 0 },
+        { x: 14, y: 4, duration: 0.32, ease: "sine.inOut", repeat: 9, yoyo: true },
+        6.1,
+      );
+      tl.fromTo("#s2-head", { y: 0 }, { y: 6, duration: 1.6, ease: "sine.inOut" }, 6.2);
+      tl.set("#s2-close", { opacity: 1 }, 9.2);
+      tl.fromTo(
+        "#s2-paper-wrap",
+        { rotation: -6, scale: 1.08 },
+        { rotation: -3, scale: 1.0, duration: 2.8, ease: "power2.out" },
+        9.2,
+      );
+      const rows = gsap.utils.toArray("#s2-paper .row");
+      const penY = [155, 245, 335, 425, 605];
+      tl.set("#s2-pen", { x: 760, y: 60, rotation: -28, transformOrigin: "0% 50%" }, 9.2);
+      rows.forEach((row, i) => {
+        const t = 9.35 + i * 0.42 + (i === 4 ? 0.35 : 0);
+        tl.to(row, { clipPath: "inset(0 0% 0 0)", duration: 0.38, ease: "none" }, t);
+        tl.fromTo(
+          "#s2-pen",
+          { x: 590 },
+          { x: 1400, y: penY[i], duration: 0.38, ease: "none", immediateRender: false },
+          t,
+        );
+      });
+      tl.fromTo(
+        "#s2-rule-line",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.3, ease: "power1.inOut" },
+        11.03,
+      );
+      const circ = document.getElementById("s2-circle-path");
+      const circLen = circ.getTotalLength();
+      tl.fromTo(
+        circ,
+        { strokeDasharray: circLen, strokeDashoffset: circLen },
+        { strokeDashoffset: 0, duration: 0.45, ease: "power1.inOut" },
+        11.4,
+      );
+      tl.to("#s2-pen", { x: 1500, y: 700, duration: 0.45, ease: "power1.inOut" }, 11.4);
+
+      // CENA 3 — câmera sobe revelando o colégio, alunos chegando
+      tl.fromTo(
+        "#s3-cam",
+        { scale: 1.16, y: 120 },
+        { scale: 1.0, y: 0, duration: 6, ease: "power2.out" },
+        12,
+      );
+      tl.fromTo("#s3-cloud-a", { x: -40 }, { x: 60, duration: 6, ease: "none" }, 12);
+      tl.fromTo("#s3-cloud-b", { x: 30 }, { x: -50, duration: 6, ease: "none" }, 12);
+      tl.fromTo("#s3-cloud-c", { x: 0 }, { x: 70, duration: 6, ease: "none" }, 12);
+      tl.fromTo(
+        "#s3-birds",
+        { x: -200, y: 40 },
+        { x: 1700, y: -60, duration: 6, ease: "none" },
+        12,
+      );
+      tl.fromTo(
+        "#s3-flag-a",
+        { skewY: 0 },
+        {
+          skewY: -4,
+          duration: 0.6,
+          ease: "sine.inOut",
+          repeat: 9,
+          yoyo: true,
+          transformOrigin: "0% 50%",
+        },
+        12,
+      );
+      tl.fromTo(
+        "#s3-flag-b",
+        { skewY: 0 },
+        {
+          skewY: 4,
+          duration: 0.7,
+          ease: "sine.inOut",
+          repeat: 7,
+          yoyo: true,
+          transformOrigin: "0% 50%",
+        },
+        12,
+      );
+      tl.fromTo(
+        "#s3-minute",
+        { rotation: 0 },
+        { rotation: 30, duration: 6, ease: "none", svgOrigin: "960 214" },
+        12,
+      );
+      [
+        ["#s3-kid-1", 860, 1110, 930, 780, 0],
+        ["#s3-kid-2", 1050, 1150, 990, 790, 0.4],
+        ["#s3-kid-3", 980, 1220, 965, 800, 0.8],
+      ].forEach(([id, x0, y0, x1, y1, d]) => {
+        tl.fromTo(
+          id,
+          { x: x0, y: y0, scale: 1.5 },
+          { x: x1, y: y1, scale: 0.55, duration: 5.6 - d, ease: "none" },
+          12 + d,
+        );
+      });
+
+      // CENA 4 — renda sobe e despenca
+      tl.fromTo("#s4-cam", { scale: 1.04 }, { scale: 1.0, duration: 6, ease: "sine.out" }, 18);
+      const up = document.getElementById("s4-line-up");
+      const down = document.getElementById("s4-line-down");
+      const upLen = up.getTotalLength();
+      const downLen = down.getTotalLength();
+      tl.fromTo(
+        up,
+        { strokeDasharray: upLen, strokeDashoffset: upLen },
+        { strokeDashoffset: 0, duration: 2.2, ease: "power1.inOut" },
+        18.3,
+      );
+      tl.fromTo(
+        "#s4-reveal-rect",
+        { attr: { width: 160 } },
+        { attr: { width: 1080 }, duration: 2.2, ease: "power1.inOut" },
+        18.3,
+      );
+      tl.to("#s4-peak", { opacity: 1, duration: 0.2 }, 20.4);
+      tl.fromTo(
+        down,
+        { strokeDasharray: downLen, strokeDashoffset: downLen },
+        { strokeDashoffset: 0, duration: 1.0, ease: "power3.in" },
+        20.8,
+      );
+      tl.to("#s4-reveal-rect", { attr: { width: 1780 }, duration: 1.0, ease: "power3.in" }, 20.8);
+      tl.to("#s4-peak", { fill: "#ff3b3b", duration: 0.2 }, 20.8);
+      tl.to("#s4-red", { opacity: 1, duration: 0.5, ease: "power2.out" }, 21.6);
+      tl.to("#s4-arrow", { opacity: 1, duration: 0.3 }, 21.7);
+      tl.fromTo("#s4-arrow", { y: -60 }, { y: 0, duration: 0.5, ease: "back.out(2)" }, 21.7);
+      tl.fromTo(
+        "#s4-badge",
+        { opacity: 0, scale: 1.6 },
+        { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2.2)" },
+        21.9,
+      );
+      tl.to("#s4-value", { color: "#ff4a4a", duration: 0.3 }, 21.0);
+      tl.to(
+        "#s4-cam",
+        {
+          keyframes: [
+            { x: -14, y: 8, duration: 0.05 },
+            { x: 12, y: -10, duration: 0.05 },
+            { x: -8, y: 6, duration: 0.05 },
+            { x: 6, y: -4, duration: 0.05 },
+            { x: 0, y: 0, duration: 0.06 },
+          ],
+        },
+        21.75,
+      );
+      const money = { v: 12000 };
+      const valueEl = document.getElementById("s4-value");
+      const fmt = (v) =>
+        "R$ " + String(Math.round(v / 100) * 100).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      const render = () => (valueEl.textContent = fmt(money.v));
+      tl.fromTo(
+        money,
+        { v: 12000 },
+        { v: 24800, duration: 2.2, ease: "power1.inOut", onUpdate: render },
+        18.3,
+      );
+      tl.fromTo(
+        money,
+        { v: 24800 },
+        { v: 4200, duration: 1.0, ease: "power3.in", onUpdate: render, immediateRender: false },
+        20.8,
+      );
+
+      // CENA 5 — médico com a prancheta, foco no exame
+      tl.fromTo(
+        "#s5-cam",
+        { scale: 1.0, x: 0, y: 0 },
+        { scale: 1.12, x: -40, y: -30, duration: 6, ease: "sine.inOut" },
+        24,
+      );
+      const ecg = document.getElementById("s5-ecg-hi");
+      const ecgLen = ecg.getTotalLength();
+      tl.fromTo(
+        ecg,
+        { strokeDasharray: `140 ${ecgLen}`, strokeDashoffset: 140 },
+        { strokeDashoffset: -ecgLen, duration: 1.2, ease: "none", repeat: 4 },
+        24,
+      );
+      tl.to("#s5-mass", { opacity: 1, duration: 0.8 }, 25.2);
+      tl.fromTo(
+        "#s5-ring",
+        { opacity: 0, scale: 1.6 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out", svgOrigin: "566 420" },
+        25.4,
+      );
+      tl.to(
+        "#s5-mass",
+        { opacity: 0.55, duration: 0.6, ease: "sine.inOut", repeat: 5, yoyo: true },
+        26.0,
+      );
+      tl.fromTo(
+        "#s5-mark",
+        { strokeDasharray: 180, strokeDashoffset: 180 },
+        { strokeDashoffset: 0, duration: 0.5, ease: "power1.out" },
+        25.8,
+      );
+      tl.fromTo(
+        "#s5-head",
+        { y: 8, rotation: 0 },
+        { y: 0, rotation: -3, duration: 1.2, ease: "power2.inOut", svgOrigin: "1060 560" },
+        27.0,
+      );
+      tl.fromTo("#s5-board", { y: 0 }, { y: 24, duration: 1.2, ease: "power2.inOut" }, 27.0);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
